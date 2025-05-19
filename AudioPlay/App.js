@@ -52,4 +52,55 @@ async function loadSound() {
       }
     }
   }
+
+  async function unloadSound() {
+    if(sound) {
+      console.log('Descarregando Som...');
+      try{
+        await sound.stopAsync();
+        await sound.unloadAsync();
+        setSound(null);
+        setIsPlaying(false);
+        console.log('Som Descarregado');
+      } catch (error) {
+        console.error('Erro ao descarregar o som: ', error)
+      }
+    }
+  }
+  async function setIsLooping() {
+    if(sound) {
+      try{
+        await sound.setIsLoopingAsync(!isLooping);
+        setIsLoop('Looping:', !isLooping);
+      } catch (error) {
+        console.error('Erro ao definir o looping: ', error);
+      }
+    }
+  }
+  useEffect(() => {
+    loadSound();
+
+    return () => {
+      console.log('Desmontando componente, descarregando som...');
+      if(sound) {
+        sound.unloadAsync();
+      }
+    };
+  }, []);
+
+  return(
+  <View style = {Style.container}>
+    <Button title = {isPlaying ? 'Pausar som' : 'Tocar som'} onPress={isPlaying ? pauseSound : playSound} disabled = {!sound}/>
+    <Button title = {isPlaying ? 'Desativar Loop' : 'Ativar Loop'} onPress={setLooping} disabled = {!sound}/><Button title = {isPlaying ? 'Desativar Loop' : 'Ativar Loop'} onPress={setLooping} disabled = {!sound}/>
+    <Button title = "Descarregar som" onPress={unloadSound} disabled = {!sound}/>
+  </View>
+  );
 }
+
+const styles = Stylesheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
