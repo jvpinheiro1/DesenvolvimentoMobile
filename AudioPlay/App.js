@@ -1,25 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Button, View, Stylesheet } from 'react-native';
+import { Button, View, StyleSheet } from 'react-native';
 import { Audio } from 'expo-av';
 
 export default function App() {
-// Estado para armazenar o objeto de som carregado
-const [sound, setSound] = useState(null);
-// Estado para controlar se o som está tocando
-const [isPlaying, setIsPlaying] = useState(false);
-// Estado para controlar se o som esta em loop
-const [isLooping, setIsLoop] = useState(false);
+  const [sound, setSound] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLooping, setIsLooping] = useState(false);
 
-// Função assíncrona para carregar o arquivo de áudio
-async function loadSound() {
-  console.log('Carregando Som ... ');
-  try {
-    // Carrega o arquivo de audio 'assets/audio_exemplo.mp3'.
-    // Certifique-se de que este arquivo exista na pasta 'assets' do seu projeto.
-    const { sound } = await Audio. Sound. createAsync(
-      require('./assets/560446music.mp3')
-);
-// Atualiza o estado 'sound' com o objeto de som carregado
+  async function loadSound() {
+    console.log('Carregando Som...');
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        require('./assets/351372clang.mp3')
+      );
       setSound(sound);
       console.log('Som Carregado');
     } catch (error) {
@@ -28,76 +21,90 @@ async function loadSound() {
   }
 
   async function playSound() {
-    if(sound) {
+    if (sound) {
       console.log('Tocando som...');
       try {
-        //Inicia a reprodução do som
         await sound.playAsync();
-        //Atualia o estado do 'isPlaying' paga true
         setIsPlaying(true);
-      } catch(error) {
-        console.error('Erro ao tocar o som: '. error);
+      } catch (error) {
+        console.error('Erro ao tocar o som:', error);
       }
     }
   }
+
   async function pauseSound() {
     if (sound && isPlaying) {
       console.log('Pausando Som...');
       try {
         await sound.pauseAsync();
         setIsPlaying(false);
-      }catch(error) {
-        console.error('Erro ao pausar o som: '. error);
-        
+      } catch (error) {
+        console.error('Erro ao pausar o som:', error);
       }
     }
   }
 
   async function unloadSound() {
-    if(sound) {
+    if (sound) {
       console.log('Descarregando Som...');
-      try{
+      try {
         await sound.stopAsync();
         await sound.unloadAsync();
         setSound(null);
         setIsPlaying(false);
+        setIsLooping(false);
         console.log('Som Descarregado');
       } catch (error) {
-        console.error('Erro ao descarregar o som: ', error)
+        console.error('Erro ao descarregar o som:', error);
       }
     }
   }
-  async function setIsLooping() {
-    if(sound) {
-      try{
+
+  async function toggleLooping() {
+    if (sound) {
+      try {
         await sound.setIsLoopingAsync(!isLooping);
-        setIsLoop('Looping:', !isLooping);
+        setIsLooping(!isLooping);
+        console.log('Looping:', !isLooping);
       } catch (error) {
-        console.error('Erro ao definir o looping: ', error);
+        console.error('Erro ao definir o looping:', error);
       }
     }
   }
+
   useEffect(() => {
     loadSound();
 
     return () => {
       console.log('Desmontando componente, descarregando som...');
-      if(sound) {
+      if (sound) {
         sound.unloadAsync();
       }
     };
   }, []);
 
-  return(
-  <View style = {Style.container}>
-    <Button title = {isPlaying ? 'Pausar som' : 'Tocar som'} onPress={isPlaying ? pauseSound : playSound} disabled = {!sound}/>
-    <Button title = {isPlaying ? 'Desativar Loop' : 'Ativar Loop'} onPress={setLooping} disabled = {!sound}/><Button title = {isPlaying ? 'Desativar Loop' : 'Ativar Loop'} onPress={setLooping} disabled = {!sound}/>
-    <Button title = "Descarregar som" onPress={unloadSound} disabled = {!sound}/>
-  </View>
+  return (
+    <View style={styles.container}>
+      <Button
+        title={isPlaying ? 'Pausar som' : 'Tocar som'}
+        onPress={isPlaying ? pauseSound : playSound}
+        disabled={!sound}
+      />
+      <Button
+        title={isLooping ? 'Desativar Loop' : 'Ativar Loop'}
+        onPress={toggleLooping}
+        disabled={!sound}
+      />
+      <Button
+        title="Descarregar som"
+        onPress={unloadSound}
+        disabled={!sound}
+      />
+    </View>
   );
 }
 
-const styles = Stylesheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
